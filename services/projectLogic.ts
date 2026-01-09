@@ -7,7 +7,7 @@ export const createNewMemoryCard = (name: string, type: ProjectType, description
   const now = new Date().toISOString();
   return {
     app_metadata: {
-      app_version: "1.0.0",
+      app_version: "1.1.0",
       created_at: now,
       last_modified: now,
       file_format_version: "1.0",
@@ -22,7 +22,7 @@ export const createNewMemoryCard = (name: string, type: ProjectType, description
       created_at: now,
       active_persona: 'software_engineer'
     },
-    personas: INITIAL_PERSONAS,
+    personas: JSON.parse(JSON.stringify(INITIAL_PERSONAS)), // Deep copy to avoid reference issues
     sprints: [],
     performance_analytics: {
       macro_analysis: {
@@ -44,18 +44,20 @@ export const createNewMemoryCard = (name: string, type: ProjectType, description
 };
 
 export const calculateCompletion = (card: MemoryCard): MemoryCard => {
+  if (!card) return card;
+  
   const newCard = { ...card, app_metadata: { ...card.app_metadata, last_modified: new Date().toISOString() } };
   
   // 1. Recalculate Micro Sprints
   newCard.sprints = newCard.sprints.map(sprint => {
     const updatedMicroSprints = sprint.micro_sprints.map(ms => {
-      const totalTasks = ms.tasks.length;
-      const completedTasks = ms.tasks.filter(t => t.status === 'completed').length;
+      const totalTasks = ms.tasks ? ms.tasks.length : 0;
+      const completedTasks = ms.tasks ? ms.tasks.filter(t => t.status === 'completed').length : 0;
       
       const completionPercentage = totalTasks === 0 ? (ms.status === 'completed' ? 100 : 0) : (completedTasks / totalTasks) * 100;
       
-      const actualHours = ms.tasks.reduce((sum, t) => sum + (t.actual_hours || 0), 0);
-      const estimatedHours = ms.tasks.reduce((sum, t) => sum + (t.estimated_hours || 0), 0);
+      const actualHours = ms.tasks ? ms.tasks.reduce((sum, t) => sum + (t.actual_hours || 0), 0) : 0;
+      const estimatedHours = ms.tasks ? ms.tasks.reduce((sum, t) => sum + (t.estimated_hours || 0), 0) : 0;
 
       // Status update based on completion
       let status: Status = ms.status;
@@ -66,22 +68,25 @@ export const calculateCompletion = (card: MemoryCard): MemoryCard => {
 
       return {
         ...ms,
-        completion_percentage: completionPercentage,
+        completion_percentage: isNaN(completionPercentage) ? 0 : completionPercentage,
         actual_hours: actualHours,
-        estimated_hours: estimatedHours, // Update estimates based on tasks
+        estimated_hours: estimatedHours,
         status
       };
     });
 
     // 2. Recalculate Sprint
     const totalSprintCompletion = updatedMicroSprints.reduce((sum, ms) => {
-      return sum + (ms.completion_percentage * ms.weight_in_sprint);
+      return sum + (ms.completion_percentage * (ms.weight_in_sprint || 0));
     }, 0);
 
     const sprintActualHours = updatedMicroSprints.reduce((sum, ms) => sum + ms.actual_hours, 0);
     const sprintEstHours = updatedMicroSprints.reduce((sum, ms) => sum + ms.estimated_hours, 0);
-    const totalSprintTasks = updatedMicroSprints.reduce((sum, ms) => sum + ms.tasks.length, 0);
-    const completedSprintTasks = updatedMicroSprints.reduce((sum, ms) => sum + ms.tasks.filter(t => t.status === 'completed').length, 0);
+    const totalSprintTasks = updatedMicroSprints.reduce((sum, ms) => sum + (ms.tasks ? ms.tasks.length : 0), 0);
+    const completedSprintTasks = updatedMicroSprints.reduce((sum, ms) => sum + (ms.tasks ? ms.tasks.filter(t => t.status === 'completed').length : 0), 0);
+
+    // FIX: Avoid Division by Zero => Infinity/NaN
+    const efficiencyRatio = sprintEstHours > 0 ? sprintActualHours / sprintEstHours : 0;
 
     const summary: SprintSummary = {
       total_micro_sprints: updatedMicroSprints.length,
@@ -90,20 +95,20 @@ export const calculateCompletion = (card: MemoryCard): MemoryCard => {
       completed_tasks: completedSprintTasks,
       total_estimated_hours: sprintEstHours,
       total_actual_hours: sprintActualHours,
-      efficiency_ratio: sprintEstHours > 0 ? sprintActualHours / sprintEstHours : 1, // < 1 means faster than estimated (technically usually we want 1 or slightly less)
-      velocity: completedSprintTasks // Simple velocity calculation
+      efficiency_ratio: isFinite(efficiencyRatio) ? efficiencyRatio : 0,
+      velocity: completedSprintTasks
     };
 
     let sprintStatus: Status = sprint.status;
     if (sprintStatus !== 'completed' && sprintStatus !== 'pending') {
-        if (totalSprintCompletion >= 100) sprintStatus = 'completed';
+        if (totalSprintCompletion >= 99.9) sprintStatus = 'completed';
         else if (totalSprintCompletion > 0) sprintStatus = 'in_progress';
     }
 
     return {
       ...sprint,
       micro_sprints: updatedMicroSprints,
-      completion_percentage: Math.min(100, totalSprintCompletion),
+      completion_percentage: Math.min(100, isNaN(totalSprintCompletion) ? 0 : totalSprintCompletion),
       sprint_summary: summary,
       status: sprintStatus
     };
@@ -123,14 +128,28 @@ export const calculateCompletion = (card: MemoryCard): MemoryCard => {
       projectCompletion = completedContribution + activeContribution;
   }
 
+  // FIX: Safe Math for Analytics
+  const totalHoursInvested = newCard.sprints.reduce((sum, s) => sum + (s.sprint_summary?.total_actual_hours || 0), 0);
+  const totalHoursEstimated = newCard.sprints.reduce((sum, s) => sum + (s.sprint_summary?.total_estimated_hours || 0), 0);
+  const remainingHours = Math.max(0, totalHoursEstimated - totalHoursInvested);
+  
+  const totalEfficiency = totalHoursEstimated > 0 ? totalHoursInvested / totalHoursEstimated : 0;
+  
+  // Calculate Average Velocity (only for sprints with tasks)
+  const activeSprintsCount = newCard.sprints.filter(s => s.sprint_summary.total_tasks > 0).length;
+  const totalVelocity = newCard.sprints.reduce((sum, s) => sum + s.sprint_summary.velocity, 0);
+  const avgVelocity = activeSprintsCount > 0 ? totalVelocity / activeSprintsCount : 0;
+
   newCard.performance_analytics.macro_analysis = {
     ...newCard.performance_analytics.macro_analysis,
     overall_project_completion: parseFloat(projectCompletion.toFixed(1)),
     sprints_completed: completedSprints,
     sprints_in_progress: inProgressSprints,
     sprints_pending: newCard.sprints.filter(s => s.status === 'pending').length,
-    total_hours_invested: newCard.sprints.reduce((sum, s) => sum + s.sprint_summary.total_actual_hours, 0),
-    total_hours_estimated_remaining: newCard.sprints.reduce((sum, s) => sum + (s.sprint_summary.total_estimated_hours - s.sprint_summary.total_actual_hours), 0) // Simplified
+    average_sprint_efficiency: parseFloat(totalEfficiency.toFixed(2)),
+    average_velocity: parseFloat(avgVelocity.toFixed(1)),
+    total_hours_invested: totalHoursInvested,
+    total_hours_estimated_remaining: remainingHours
   };
 
   // Micro analysis update
@@ -141,8 +160,8 @@ export const calculateCompletion = (card: MemoryCard): MemoryCard => {
         sprint_id: currentSprint.id,
         completion: currentSprint.completion_percentage,
         current_velocity: currentSprint.sprint_summary.velocity,
-        estimated_remaining_days: 0, // Would need complex calc
-        at_risk_tasks: 0, // Placeholder
+        estimated_remaining_days: 0,
+        at_risk_tasks: 0,
         blocked_tasks: currentSprint.micro_sprints.reduce((sum, ms) => sum + ms.tasks.filter(t => t.status === 'blocked').length, 0)
       }
     };

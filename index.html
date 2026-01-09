@@ -16,45 +16,94 @@
                 500: '#0ea5e9',
                 600: '#0284c7',
                 900: '#0c4a6e',
+                950: '#082f49',
               }
             }
           }
         }
       }
     </script>
+    <script>
+      // Robust Polyfill for process.env
+      window.process = window.process || {};
+      window.process.env = window.process.env || {};
+      
+      // --- DEBUG SYSTEM: EARLY CAPTURE ---
+      // Captures errors that happen before React loads (imports, syntax, etc)
+      window.__PRE_LOAD_LOGS__ = [];
+      
+      function captureLog(level, args) {
+        try {
+          const message = args.map(a => 
+            (typeof a === 'object' && a !== null) ? (a.message || JSON.stringify(a)) : String(a)
+          ).join(' ');
+          
+          window.__PRE_LOAD_LOGS__.push({
+            level,
+            message,
+            timestamp: new Date().toISOString()
+          });
+        } catch (e) { }
+      }
+
+      window.onerror = function(msg, url, line, col, error) {
+        const errInfo = `GLOBAL ERROR: ${msg}\nLocation: ${url}:${line}:${col}\nStack: ${error ? error.stack : 'N/A'}`;
+        captureLog('error', [errInfo]);
+        
+        // Emergency UI for load failures
+        const root = document.getElementById('root');
+        if (root && root.innerHTML === '') {
+           const div = document.createElement('div');
+           div.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:#0f172a;color:#f87171;padding:20px;z-index:99999;font-family:monospace;white-space:pre-wrap;overflow:auto;';
+           div.innerHTML = `<h1>CRITICAL LOAD ERROR</h1><hr/><pre>${errInfo}</pre>`;
+           document.body.appendChild(div);
+        }
+        return false; 
+      };
+
+      window.addEventListener('unhandledrejection', function(event) {
+        captureLog('error', [`UNHANDLED PROMISE: ${event.reason}`]);
+      });
+      
+      // Intercept initial console calls
+      const _origLog = console.log;
+      const _origWarn = console.warn;
+      const _origError = console.error;
+      
+      console.log = function(...args) { captureLog('info', args); _origLog.apply(console, args); };
+      console.warn = function(...args) { captureLog('warn', args); _origWarn.apply(console, args); };
+      console.error = function(...args) { captureLog('error', args); _origError.apply(console, args); };
+    </script>
     <style>
       body {
         background-color: #f8fafc;
         color: #0f172a;
       }
-      /* Custom Scrollbar for sleek look */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-      ::-webkit-scrollbar-track {
-        background: #f1f5f9; 
-      }
-      ::-webkit-scrollbar-thumb {
-        background: #cbd5e1; 
-        border-radius: 4px;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8; 
-      }
+      ::-webkit-scrollbar { width: 8px; height: 8px; }
+      ::-webkit-scrollbar-track { background: #f1f5f9; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "recharts": "https://esm.sh/recharts@^3.6.0",
-    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@0.2.1"
-  }
-}
-</script>
+    <!-- 
+      STRICT IMPORT MAP (REACT 18 ONLY):
+      - Maps 'react', 'react-dom' AND their subpaths to 18.2.0.
+      - Removed React 19 entries to prevent version conflicts.
+      - Ensures JSX runtime uses React 18.
+    -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react/": "https://esm.sh/react@18.2.0/",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "react-dom": "https://esm.sh/react-dom@18.2.0",
+        "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+        "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom",
+        "lucide-react": "https://esm.sh/lucide-react@0.344.0?external=react",
+        "@google/genai": "https://esm.sh/@google/genai@0.2.1"
+      }
+    }
+    </script>
 </head>
   <body>
     <div id="root"></div>

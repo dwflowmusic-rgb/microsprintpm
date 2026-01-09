@@ -32,9 +32,14 @@ export const generateProjectFromDocs = async (
   projectType: ProjectType
 ): Promise<MemoryCard> => {
   
-  // Initialize client inside the function to avoid top-level ReferenceError if 'process' is undefined
-  // This ensures the app loads even if the API key environment is not set up until execution time.
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // Safe Access to API Key
+  const apiKey = process.env.API_KEY || (window.process && window.process.env && window.process.env.API_KEY);
+  
+  if (!apiKey) {
+    throw new Error("Erro de Configuração: API_KEY não encontrada no process.env. O ambiente deve injetar a chave.");
+  }
+
+  const ai = new GoogleGenAI({ apiKey: apiKey });
 
   // Prepare file parts
   const fileParts = await Promise.all(files.map(fileToPart));
@@ -125,7 +130,10 @@ export const generateProjectFromDocs = async (
       }
     });
 
-    const generatedData = JSON.parse(response.text!);
+    const text = response.text;
+    if (!text) throw new Error("A IA não retornou texto.");
+
+    const generatedData = JSON.parse(text);
     
     // Hydrate the raw JSON into a full MemoryCard object
     const emptyCard = createNewMemoryCard(
@@ -141,7 +149,7 @@ export const generateProjectFromDocs = async (
     // Transform Sprints
     let startDate = new Date();
     
-    emptyCard.sprints = generatedData.sprints.map((s: any, sIdx: number) => {
+    emptyCard.sprints = (generatedData.sprints || []).map((s: any, sIdx: number) => {
       const sprintId = `sprint_${sIdx + 1}`;
       const duration = s.planned_duration_days || 7;
       
@@ -157,38 +165,38 @@ export const generateProjectFromDocs = async (
 
       return {
         id: sprintId,
-        name: s.name,
+        name: s.name || `Sprint ${sIdx+1}`,
         description: s.description || "",
         status: sIdx === 0 ? 'in_progress' : 'pending',
         start_date: start.toISOString().split('T')[0],
         planned_end_date: end.toISOString().split('T')[0],
         planned_duration_days: duration,
         completion_percentage: 0,
-        micro_sprints: s.micro_sprints.map((ms: any, msIdx: number) => {
+        micro_sprints: (s.micro_sprints || []).map((ms: any, msIdx: number) => {
           const msId = `${sprintId}_ms_${msIdx + 1}`;
           
           // Construct Persona Analysis object
           const analysis: any = {};
           analysis[persona] = {
-            technical_notes: ms.persona_analysis_text,
-            compliance_notes: ms.persona_analysis_text, // Fallback for lawyer
+            technical_notes: ms.persona_analysis_text || "",
+            compliance_notes: ms.persona_analysis_text || "", // Fallback for lawyer
             metrics: { "AI Confidence": "High" }
           };
 
           return {
             id: msId,
-            name: ms.name,
+            name: ms.name || `Micro Sprint ${msIdx+1}`,
             description: ms.description || "",
             status: sIdx === 0 && msIdx === 0 ? 'in_progress' : 'pending',
-            weight_in_sprint: ms.weight_in_sprint || (1 / s.micro_sprints.length),
+            weight_in_sprint: ms.weight_in_sprint || (1 / (s.micro_sprints?.length || 1)),
             estimated_hours: ms.estimated_hours || 0,
             actual_hours: 0,
             completion_percentage: 0,
             custom_annotations: [],
             persona_analysis: analysis,
-            tasks: ms.tasks.map((t: any, tIdx: number) => ({
+            tasks: (ms.tasks || []).map((t: any, tIdx: number) => ({
               id: `${msId}_task_${tIdx + 1}`,
-              description: t.description,
+              description: t.description || "Nova Tarefa",
               status: 'pending',
               estimated_hours: t.estimated_hours || 1,
               actual_hours: 0
@@ -209,6 +217,6 @@ export const generateProjectFromDocs = async (
 
   } catch (error) {
     console.error("Erro na geração IA:", error);
-    throw new Error("Falha ao processar documentos com Gemini. Verifique sua API Key e conexão.");
+    throw new Error("Falha ao processar documentos com Gemini. Verifique se sua chave API é válida e suporta o modelo Gemini 3.0 Pro.");
   }
 };
