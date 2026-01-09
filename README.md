@@ -1,18 +1,19 @@
 # MicroSprint PM
 
-> **Sistema Avançado de Gerenciamento de Projetos com Micro Sprints, Visões Multi-Persona e Persistência Portátil via Memory Card.**
+> **Sistema Avançado de Gerenciamento de Projetos com Micro Sprints, Visões Multi-Persona, Persistência Portátil e "Cérebro" de IA (Gemini 3.0).**
 
 ![Status](https://img.shields.io/badge/status-stable-green)
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
+![Version](https://img.shields.io/badge/version-1.1.0-blue)
 ![License](https://img.shields.io/badge/license-MIT-orange)
+![AI-Powered](https://img.shields.io/badge/AI-Gemini%203.0%20Pro-purple)
 
 ## 📋 Visão Geral Executiva
 
-**O que é:** O MicroSprint PM é um sistema de gerenciamento de projetos projetado para alta granularidade. Diferente de ferramentas tradicionais que param no nível do "Sprint", o MicroSprint PM introduz o conceito de **Micro Sprints** (ciclos de 1-3 dias), permitindo um rastreamento ultra-preciso do progresso.
+**O que é:** O MicroSprint PM é um sistema de gerenciamento de projetos projetado para alta granularidade. Diferente de ferramentas tradicionais, ele introduz **Micro Sprints** (ciclos de 1-3 dias) e utiliza **Inteligência Artificial Multimodal** para ler seus documentos de planejamento (PDFs, DOCX) e gerar a estrutura do projeto automaticamente.
 
-**Por que existe:** Profissionais híbridos (ex: desenvolvedores que também gerenciam contratos, ou gestores técnicos) precisam alternar entre contextos complexos sem perder o histórico. Ferramentas atuais ou são muito rígidas (Jira) ou muito simples (Trello). O MicroSprint PM resolve isso com **Visões Multi-Persona** (analisar o mesmo projeto como Engenheiro ou Advogado) e **Portabilidade Total**.
+**Por que existe:** Criar cronogramas do zero é trabalhoso. O MicroSprint PM elimina esse atrito. Você faz upload do seu briefing ou PRD, e o **Gemini 3.0 Pro** estrutura sprints, estima horas e identifica riscos, adaptando tudo para a visão de Engenheiros ou Advogados.
 
-**O Diferencial:** O conceito de **Memory Card**. Todo o estado do seu projeto reside em um único arquivo JSON autossuficiente. Você não depende de um servidor central. Salve seu arquivo, envie por e-mail, version no Git, ou carregue em outra máquina e continue exatamente de onde parou.
+**O Diferencial:** O conceito de **Memory Card**. Todo o estado do seu projeto reside em um único arquivo JSON autossuficiente. Salve, envie por e-mail ou version no Git.
 
 ---
 
@@ -20,20 +21,30 @@
 
 | Recurso | Descrição |
 | :--- | :--- |
-| 🎯 **Hierarquia de 4 Níveis** | Projeto → Sprint → Micro Sprint → Tarefa. Granularidade real para controle diário. |
-| 💾 **Memory Card Portátil** | Estado completo em JSON. Zero vendor lock-in. Seus dados são seus. |
-| 🧠 **Análise Multi-Persona** | Alterne instantaneamente entre visão técnica (Engenheiro) e visão de compliance (Jurídico). |
-| 📊 **Progresso Ponderado** | Cálculos matemáticos precisos de progresso baseados em pesos de micro sprints, não apenas contagem de tarefas. |
-| ⚡ **Velocity & Eficiência** | Métricas automáticas de velocidade e eficiência (Horas Reais vs Estimadas). |
-| 🛡️ **Rastreabilidade** | Histórico de decisões técnicas e log de alterações imutável. |
+| 🧠 **Cérebro AI (Gemini 3.0)** | Arraste documentos e deixe a IA criar Sprints, Micro Sprints e Tasks automaticamente. |
+| 🎯 **Hierarquia de 4 Níveis** | Projeto → Sprint → Micro Sprint → Tarefa. Granularidade real. |
+| 💾 **Memory Card Portátil** | Estado completo em JSON. Zero vendor lock-in. |
+| 🧩 **Análise Multi-Persona** | Alterne instantaneamente entre visão técnica e jurídica. |
+| 📊 **Progresso Ponderado** | Cálculos matemáticos precisos baseados em pesos de micro sprints. |
+| ⚡ **Velocity & Eficiência** | Métricas automáticas de velocidade e eficiência. |
 
 ---
 
 ## 🚀 Quick Start (Começo Rápido)
 
 ### Pré-requisitos
-- Um navegador moderno (Chrome, Edge, Firefox, Safari).
-- (Opcional) Node.js instalado se for rodar localmente.
+- Navegador moderno.
+- Chave de API do Google Gemini (`API_KEY`) configurada no ambiente.
+
+### Criando um Projeto com IA
+
+1. Abra a aplicação.
+2. Clique no botão roxo **"Criar Projeto com IA (Gemini 3.0)"**.
+3. Selecione o tipo de projeto (ex: Software) e a Persona (ex: Engenheiro).
+4. **Arraste seus arquivos** (PDFs, Imagens de Wireframes, Docs de requisitos).
+5. Clique em **Gerar**.
+6. Revise a estrutura criada pela IA e confirme.
+7. Pronto! Seu projeto de meses foi planejado em segundos.
 
 ### Rodando Localmente
 
@@ -53,37 +64,19 @@
    npm start
    ```
 
-4. Acesse `http://localhost:3000` no seu navegador.
-
-### Usando a Aplicação
-
-1. Clique em **"Criar Novo Projeto"**.
-2. Defina o nome (ex: "Migração Cloud") e a Persona Principal (ex: Engenheiro de Software).
-3. No Dashboard, vá para a aba **Sprints & Tarefas**.
-4. Crie seu primeiro Sprint (ex: "Sprint 1: Fundação").
-5. Dentro do Sprint, crie um **Micro Sprint** (ex: "Configuração de Ambiente", Peso: 0.3).
-6. Adicione tarefas e comece a trabalhar!
-7. Ao final do dia, clique em **"Salvar Memory Card"** para baixar seu JSON de backup.
-
 ---
 
 ## 📚 Documentação Completa
 
-Para detalhes profundos, consulte nossos guias especializados:
-
-- [📖 **Guia do Usuário**](docs/USER_GUIDE.md): Tutorial passo-a-passo para dominar o sistema.
-- [🏗️ **Arquitetura**](docs/ARCHITECTURE.md): Decisões de design, estrutura técnica e cálculos.
-- [🧩 **Referência da API & Lógica**](docs/API_REFERENCE.md): Detalhes das funções internas e lógica de negócio.
-- [💾 **Schema do Memory Card**](docs/MEMORY_CARD_SCHEMA.md): Especificação técnica do formato JSON.
-- [💡 **Exemplos Práticos**](docs/EXAMPLES.md): Casos de uso reais (Dev e Jurídico).
-- [🤝 **Guia de Contribuição**](docs/CONTRIBUTING.md): Como ajudar a evoluir o projeto.
-- [📝 **Changelog**](docs/CHANGELOG.md): Histórico de versões e mudanças.
+- [📖 **Guia do Usuário**](docs/USER_GUIDE.md): Tutorial passo-a-passo (Manual e IA).
+- [🏗️ **Arquitetura**](docs/ARCHITECTURE.md): Detalhes da integração com Gemini e lógica de cálculo.
+- [🧩 **Referência da API**](docs/API_REFERENCE.md): Funções internas e serviços de IA.
+- [💾 **Schema do Memory Card**](docs/MEMORY_CARD_SCHEMA.md): Especificação do JSON.
+- [🤝 **Guia de Contribuição**](docs/CONTRIBUTING.md): Como ajudar.
+- [📝 **Changelog**](docs/CHANGELOG.md): Histórico de versões (v1.1.0).
 
 ---
 
 ## 📄 Licença
 
-Este projeto está licenciado sob a licença MIT - veja o arquivo LICENSE para detalhes.
-
----
-*Construído com React, TailwindCSS e Lucide Icons.*
+Licença MIT. Construído com React, TailwindCSS, Lucide Icons e Google GenAI SDK.

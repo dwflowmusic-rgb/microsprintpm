@@ -1,106 +1,83 @@
 # Guia do Usuário - MicroSprint PM
 
-Bem-vindo ao guia definitivo do MicroSprint PM. Este documento levará você desde os conceitos básicos até fluxos de trabalho avançados.
+Bem-vindo ao guia definitivo do MicroSprint PM. Este documento cobre desde a criação manual até a geração automática de projetos via IA.
 
 ---
 
 ## 1. Conceitos Fundamentais
 
-Antes de clicar nos botões, é crucial entender a filosofia do sistema:
-
 ### A Hierarquia Temporal
-O sistema não vê o trabalho apenas como uma lista de tarefas. Ele usa uma estrutura de 4 níveis:
-1.  **Projeto**: O objetivo macro (ex: "Lançar App Mobile"). Dura meses.
-2.  **Sprint**: Um ciclo de 1-2 semanas com uma meta entregável (ex: "Autenticação e Login").
-3.  **Micro Sprint**: A inovação do sistema. Blocos de 1 a 3 dias (ex: "Implementar JWT", "Telas de Login"). É aqui que o progresso real é medido.
-4.  **Tarefa**: A unidade atômica (ex: "Instalar lib", "Criar rota API").
+O sistema usa uma estrutura de 4 níveis:
+1.  **Projeto**: O objetivo macro (ex: "Lançar App Mobile").
+2.  **Sprint**: Ciclo de 1-2 semanas.
+3.  **Micro Sprint**: Blocos de 1-3 dias. A inovação central para rastreamento granular.
+4.  **Tarefa**: A unidade atômica (ex: "Configurar Docker").
 
 ### O Memory Card
-Imagine um videogame antigo. Você joga, salva no cartão de memória e pode levar esse cartão para a casa de um amigo.
-O **Memory Card** aqui é um arquivo `.json`.
-- **Salvar**: O sistema gera um arquivo com TODO o estado atual.
-- **Carregar**: Você sobe esse arquivo e o sistema restaura tudo: tarefas, status, persona ativa, histórico.
-**Vantagem**: Seus dados não ficam presos em um banco de dados de terceiros.
-
-### Personas
-Você é um desenvolvedor que também cuida de contratos?
-- **Persona Engenheiro**: Foca em código, testes, débito técnico.
-- **Persona Advogado**: Foca em prazos, compliance, riscos.
-O sistema muda a interface e os insights baseados em qual "chapéu" você está usando no momento.
+Seu projeto é um arquivo `.json`.
+- **Salvar**: Baixa o arquivo com TODO o estado.
+- **Carregar**: Restaura o projeto em qualquer máquina.
 
 ---
 
-## 2. Tutorial: Seu Primeiro Projeto
+## 2. Criando Projetos (Modo IA - Recomendado)
 
-### Passo 1: Criação
-1.  Na tela inicial, clique em **"Criar Novo Projeto"**.
-2.  Preencha:
-    -   **Nome**: "Sistema de Blog"
-    -   **Tipo**: Desenvolvimento de Software
-    -   **Descrição**: "Um blog simples em React e Node."
-3.  O sistema criará o "Memory Card" na memória do navegador.
+O "Cérebro" do MicroSprint PM usa o **Gemini 3.0 Pro** para ler seus documentos e fazer o trabalho pesado de planejamento.
 
-### Passo 2: Estruturando Sprints
-1.  Vá para a aba **"Sprints & Tarefas"**.
-2.  No painel "Planejar Próximo Sprint", digite "Sprint 1: Setup" e clique em **Criar Sprint**.
-3.  O Sprint aparecerá na lista como *PENDENTE*.
+### Passo 1: Iniciar o Assistente
+1.  Na tela inicial, clique no botão em destaque: **"Criar Projeto com IA"**.
+2.  Um modal abrirá.
 
-### Passo 3: O Poder dos Micro Sprints
-Agora vamos quebrar esse Sprint de 1 semana em pedaços menores.
-1.  Expanda o "Sprint 1".
-2.  Em "Novo Micro Sprint", digite: "Configuração Backend".
-3.  **Peso**: Selecione "50%" (0.5). Isso significa que completar isso vale metade do Sprint inteiro.
-4.  Clique em **Adicionar**.
+### Passo 2: Contexto e Upload
+1.  **Tipo de Projeto**: Escolha se é Software, Jurídico ou Misto.
+2.  **Persona**: Quem é você? (Engenheiro ou Advogado). Isso define a linguagem que a IA usará.
+3.  **Upload**: Arraste seus arquivos para a área pontilhada.
+    -   *Suportado*: PDF, DOCX, TXT, Imagens (PNG/JPG).
+    -   *Exemplo*: Arraste o PDF do contrato e uma imagem da arquitetura do sistema.
+4.  **Instruções Extras**: (Opcional) Diga algo como "O prazo final é dia 20 de Dezembro" ou "Foque em testes de segurança".
 
-### Passo 4: Trabalhando
-1.  Expanda o Micro Sprint "Configuração Backend".
-2.  Adicione tarefas: "Instalar Express", "Configurar TS", "Criar rota Healthcheck".
-3.  Conforme você completa as tarefas (clicando no check), a barra de progresso do Micro Sprint sobe.
-4.  Automaticamente, a barra do Sprint sobe proporcionalmente ao peso.
-
-### Passo 5: Salvando
-1.  Terminou o dia? Clique em **"Salvar Memory Card"** na barra lateral.
-2.  O navegador baixará um arquivo `project_sistema_de_blog_YYYY-MM-DD.json`.
-3.  Guarde este arquivo. Ele é o seu projeto.
+### Passo 3: Geração e Revisão
+1.  Clique em **"Gerar Projeto com IA"**.
+2.  Aguarde (pode levar até 30s). A IA está lendo, pensando e estruturando os sprints.
+3.  **Tela de Revisão**: O sistema mostrará a estrutura gerada.
+    -   Verifique os Sprints criados.
+    -   Veja se as horas estimadas fazem sentido.
+4.  Se estiver satisfeito, clique em **"Confirmar e Criar Projeto"**.
 
 ---
 
-## 3. Workflows Comuns
+## 3. Criando Projetos (Modo Manual)
 
-### Workflow A: Troca de Máquina
-1.  Você trabalhou no escritório e salvou o `json`.
-2.  Chegou em casa, abriu o MicroSprint PM (que está "zerado").
-3.  Clique em **"Carregar Memory Card"** e selecione seu arquivo.
-4.  Pronto! Todo o seu progresso está lá.
+Se preferir controle total desde o início:
 
-### Workflow B: Análise de Riscos (Modo Advogado)
-1.  Você está codando, mas precisa ver se está dentro do prazo contratual.
-2.  Na barra lateral, clique no card de Persona (onde diz "Engenheiro de Software").
-3.  O sistema muda para **"Especialista Jurídico"**.
-4.  Vá ao Dashboard. Os insights agora focam em conformidade e prazos, não em qualidade de código.
-
-### Workflow C: Versionamento com Git
-Como o projeto é um arquivo texto (JSON):
-1.  Crie um repositório git para seus projetos.
-2.  Salve o Memory Card na pasta do repo.
-3.  Faça commit: `git commit -am "Fim do dia: Backend configurado"`.
-4.  Você tem um histórico imutável de todo o seu gerenciamento.
+1.  Clique em **"Criar Manualmente"**.
+2.  Defina Nome e Descrição.
+3.  Vá para a aba **"Sprints & Tarefas"**.
+4.  Crie Sprints manualmente.
+5.  Adicione Micro Sprints e defina seus pesos (lembre-se: a soma dos pesos deve ser ~1.0 por Sprint).
+6.  Adicione tarefas.
 
 ---
 
-## 4. Dicas e Melhores Práticas
+## 4. Trabalhando no Dia a Dia
 
-- **Micro Sprints Curtos**: Tente manter micro sprints que durem no máximo 3 dias. Se for maior, quebre em dois.
-- **Pesos Reais**: Se um Micro Sprint é difícil, dê um peso maior (ex: 0.6), mesmo que tenha poucas tarefas. O peso reflete o *esforço*, não a quantidade de checkboxes.
-- **Backup Diário**: Crie o hábito de baixar o Memory Card ao encerrar o expediente.
-- **Notas Técnicas**: Use o campo de descrição das tarefas para anotar versões de bibliotecas ou decisões rápidas.
+### Atualizando Progresso
+1.  Abra o Micro Sprint atual.
+2.  Clique no checkbox das tarefas concluídas.
+3.  O sistema recalcula automaticamente:
+    -   Progresso do Micro Sprint.
+    -   Progresso do Sprint (ponderado pelo peso).
+    -   Progresso Geral do Projeto.
+
+### Trocando de Persona
+1.  Na barra lateral, clique no card de Persona.
+2.  O sistema alterna entre **Engenheiro de Software** e **Especialista Jurídico**.
+3.  Observe como os "Insights" no Dashboard mudam para refletir novas prioridades (ex: Qualidade de Código vs. Prazos Legais).
 
 ---
 
-## 5. Resolução de Problemas (Troubleshooting)
+## 5. Salvando e Compartilhando
 
-**Problema**: O progresso do Sprint travou em 99% mesmo com tudo completo.
-**Solução**: Verifique se a soma dos pesos dos Micro Sprints é exatamente 1.0 (100%). O sistema tenta arredondar, mas pesos inconsistentes podem causar desvios visuais.
-
-**Problema**: O arquivo JSON não carrega.
-**Solução**: Certifique-se de que o arquivo não foi corrompido ou editado manualmente com erros de sintaxe. Use um validador JSON online se editou manualmente.
+1.  Sempre clique em **"Salvar Memory Card"** ao final da sessão.
+2.  Guarde o arquivo JSON baixado.
+3.  Para continuar em outro computador, use a opção **"Carregar Memory Card"** na tela inicial.

@@ -2,17 +2,14 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { MemoryCard, ProjectType, PersonaType } from "../types";
 import { createNewMemoryCard, calculateCompletion } from "./projectLogic";
 
-// Initialize the client
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-/**
- * Converts a File object to a Base64 string for Gemini
- */
+// Helper for Base64 conversion
 export const fileToPart = (file: File): Promise<{ inlineData: { data: string; mimeType: string } }> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = (reader.result as string).split(',')[1];
+      // DataURL format: data:mime/type;base64,.....
+      const result = reader.result as string;
+      const base64String = result.split(',')[1];
       resolve({
         inlineData: {
           data: base64String,
@@ -35,6 +32,10 @@ export const generateProjectFromDocs = async (
   projectType: ProjectType
 ): Promise<MemoryCard> => {
   
+  // Initialize client inside the function to avoid top-level ReferenceError if 'process' is undefined
+  // This ensures the app loads even if the API key environment is not set up until execution time.
+  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
   // Prepare file parts
   const fileParts = await Promise.all(files.map(fileToPart));
 
@@ -66,8 +67,6 @@ export const generateProjectFromDocs = async (
   `;
 
   // Define the expected Schema for Structured Output
-  // Note: We define a simplified version of the schema to save tokens/complexity, 
-  // but it matches the MemoryCard structure needed for the 'sprints' and 'project' fields.
   const responseSchema = {
     type: Type.OBJECT,
     properties: {
@@ -129,7 +128,6 @@ export const generateProjectFromDocs = async (
     const generatedData = JSON.parse(response.text!);
     
     // Hydrate the raw JSON into a full MemoryCard object
-    // We use the raw data to populate a fresh valid MemoryCard structure
     const emptyCard = createNewMemoryCard(
       generatedData.projectName || "Projeto Gerado via IA",
       projectType,
@@ -169,7 +167,7 @@ export const generateProjectFromDocs = async (
         micro_sprints: s.micro_sprints.map((ms: any, msIdx: number) => {
           const msId = `${sprintId}_ms_${msIdx + 1}`;
           
-          // Construct Persona Analysis object based on the single text field returned
+          // Construct Persona Analysis object
           const analysis: any = {};
           analysis[persona] = {
             technical_notes: ms.persona_analysis_text,
@@ -206,7 +204,7 @@ export const generateProjectFromDocs = async (
       };
     });
 
-    // Run the calculation logic to ensure all summaries and stats are correct
+    // Run the calculation logic
     return calculateCompletion(emptyCard);
 
   } catch (error) {
