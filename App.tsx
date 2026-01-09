@@ -4,14 +4,16 @@ import { createNewMemoryCard, calculateCompletion, generateId } from './services
 import { 
   Save, Upload, Briefcase, Plus, UserCircle, 
   LayoutDashboard, CheckSquare, Settings, FileJson,
-  AlertCircle
+  AlertCircle, Sparkles
 } from 'lucide-react';
 import Dashboard from './components/Dashboard';
+import AIProjectWizard from './components/AIProjectWizard';
 
 const App: React.FC = () => {
   const [memoryCard, setMemoryCard] = useState<MemoryCard | null>(null);
   const [view, setView] = useState<'dashboard' | 'sprints' | 'settings'>('dashboard');
   const [showNewProjectModal, setShowNewProjectModal] = useState(false);
+  const [showAIWizard, setShowAIWizard] = useState(false);
 
   // New Project Form State
   const [newProjectName, setNewProjectName] = useState('');
@@ -80,11 +82,25 @@ const App: React.FC = () => {
 
           <div className="space-y-4">
             <button 
+              onClick={() => setShowAIWizard(true)}
+              className="w-full py-4 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-bold transition flex items-center justify-center gap-3 shadow-md shadow-indigo-200"
+            >
+              <Sparkles className="w-6 h-6" />
+              Criar Projeto com IA (Gemini 3.0)
+            </button>
+
+            <div className="flex items-center gap-4 text-xs text-slate-400 my-2">
+              <div className="h-px bg-slate-200 flex-1"></div>
+              <span>OU</span>
+              <div className="h-px bg-slate-200 flex-1"></div>
+            </div>
+
+            <button 
               onClick={() => setShowNewProjectModal(true)}
-              className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center justify-center gap-2"
+              className="w-full py-3 px-4 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-lg font-medium transition flex items-center justify-center gap-2"
             >
               <Plus className="w-5 h-5" />
-              Criar Novo Projeto
+              Criar Manualmente
             </button>
             
             <div className="relative">
@@ -94,7 +110,7 @@ const App: React.FC = () => {
                 onChange={handleLoadMemoryCard}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
-              <button className="w-full py-3 px-4 bg-white border-2 border-slate-200 hover:border-blue-400 text-slate-600 rounded-lg font-medium transition flex items-center justify-center gap-2">
+              <button className="w-full py-3 px-4 bg-white border border-slate-300 hover:border-blue-400 text-slate-600 rounded-lg font-medium transition flex items-center justify-center gap-2">
                 <Upload className="w-5 h-5" />
                 Carregar Memory Card (.json)
               </button>
@@ -105,7 +121,7 @@ const App: React.FC = () => {
         {showNewProjectModal && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-xl p-6 w-full max-w-lg shadow-2xl">
-              <h2 className="text-xl font-bold mb-4">Inicializar Projeto</h2>
+              <h2 className="text-xl font-bold mb-4">Inicializar Projeto Manual</h2>
               <div className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-1">Nome do Projeto</label>
@@ -155,6 +171,16 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
+        )}
+
+        {showAIWizard && (
+          <AIProjectWizard 
+            onCancel={() => setShowAIWizard(false)}
+            onProjectCreated={(card) => {
+              setMemoryCard(card);
+              setShowAIWizard(false);
+            }}
+          />
         )}
       </div>
     );
